@@ -11,22 +11,22 @@ class Program
         Form selector = new Form();
         selector.Text = "Abrir Correo OWA";
         selector.Width = 300;
-        selector.Height = 200;
+        selector.Height = 180;
 
         Button btnLocal = new Button();
         btnLocal.Text = "Local - lim-sc01";
         btnLocal.Width = 200;
-        btnLocal.Top = 30;
+        btnLocal.Top = 20;
         btnLocal.Left = 40;
 
         Button btnExterno = new Button();
         btnExterno.Text = "Externo - mail.supervisor";
         btnExterno.Width = 200;
-        btnExterno.Top = 80;
+        btnExterno.Top = 70;
         btnExterno.Left = 40;
 
-        btnLocal.Click += (s,e) => Abrir("https://lim-sc01/owa");
-        btnExterno.Click += (s,e) => Abrir("https://mail.supervisorlinea2.com/owa");
+        btnLocal.Click += (s,e) => AbrirNavegador("https://lim-sc01/owa");
+        btnExterno.Click += (s,e) => AbrirNavegador("https://mail.supervisorlinea2.com/owa");
 
         selector.Controls.Add(btnLocal);
         selector.Controls.Add(btnExterno);
@@ -34,17 +34,31 @@ class Program
         Application.Run(selector);
     }
 
-    static void Abrir(string url)
+    static void AbrirNavegador(string url)
     {
-        Form form = new Form();
-        form.Width = 1200;
-        form.Height = 800;
+        Form browserForm = new Form();
+        browserForm.Width = 1200;
+        browserForm.Height = 800;
+
+        TabControl tabs = new TabControl();
+        tabs.Dock = DockStyle.Fill;
+
+        browserForm.Controls.Add(tabs);
+
+        NuevaPestana(tabs, url);
+
+        browserForm.Show();
+    }
+
+    static void NuevaPestana(TabControl tabs, string url)
+    {
+        TabPage page = new TabPage("OWA");
 
         WebBrowser browser = new WebBrowser();
         browser.Dock = DockStyle.Fill;
         browser.Navigate(url);
 
-        form.Controls.Add(browser);
-        form.Show();
+        page.Controls.Add(browser);
+        tabs.TabPages.Add(page);
     }
 }
