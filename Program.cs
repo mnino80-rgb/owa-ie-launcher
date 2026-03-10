@@ -1,5 +1,4 @@
 using System;
-using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 class Program
@@ -7,74 +6,82 @@ class Program
     static WebBrowser browser;
 
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
         Application.EnableVisualStyles();
 
+        string url = null;
+
+        if (args.Length > 0)
+        {
+            switch (args[0].ToLower())
+            {
+                case "local":
+                    url = "https://lim-sc01/owa";
+                    break;
+
+                case "externo":
+                    url = "https://mail.supervisorlinea2.com/owa";
+                    break;
+
+                case "demo":
+                    url = "https://demo-sc.local/";
+                    break;
+
+                default:
+                    url = args[0];
+                    break;
+            }
+        }
+
         Form form = new Form();
-        form.Text = "Outlook - Supervisor Línea 2";
+        form.Text = "Outlook Web - Supervisor Línea 2";
         form.WindowState = FormWindowState.Maximized;
 
-        Label status = new Label();
-        status.Text = "Conectando al servidor de correo...";
-        status.Dock = DockStyle.Top;
-        status.Height = 30;
+        Panel topBar = new Panel();
+        topBar.Height = 40;
+        topBar.Dock = DockStyle.Top;
+
+        Button btnLocal = new Button();
+        btnLocal.Text = "Correo Local";
+        btnLocal.Left = 10;
+        btnLocal.Top = 8;
+
+        Button btnExterno = new Button();
+        btnExterno.Text = "Correo Externo";
+        btnExterno.Left = 120;
+        btnExterno.Top = 8;
+
+        Button btnDemo = new Button();
+        btnDemo.Text = "Demo";
+        btnDemo.Left = 250;
+        btnDemo.Top = 8;
+
+        Button btnSalir = new Button();
+        btnSalir.Text = "Salir";
+        btnSalir.Left = 330;
+        btnSalir.Top = 8;
 
         browser = new WebBrowser();
         browser.Dock = DockStyle.Fill;
         browser.ScriptErrorsSuppressed = true;
 
+        btnLocal.Click += (s,e) => browser.Navigate("https://lim-sc01/owa");
+        btnExterno.Click += (s,e) => browser.Navigate("https://mail.supervisorlinea2.com/owa");
+        btnDemo.Click += (s,e) => browser.Navigate("https://demo-sc.local/");
+        btnSalir.Click += (s,e) => form.Close();
+
+        topBar.Controls.Add(btnLocal);
+        topBar.Controls.Add(btnExterno);
+        topBar.Controls.Add(btnDemo);
+        topBar.Controls.Add(btnSalir);
+
         form.Controls.Add(browser);
-        form.Controls.Add(status);
+        form.Controls.Add(topBar);
 
-        string url = DetectarServidor();
-
-        if (url == null)
-        {
-            MostrarErrorOutlook();
-        }
-        else
-        {
+        if (url != null)
             browser.Navigate(url);
-        }
 
         Application.Run(form);
-    }
-
-    static string DetectarServidor()
-    {
-        try
-        {
-            Ping ping = new Ping();
-
-            PingReply reply = ping.Send("lim-sc01", 1000);
-
-            if (reply.Status == IPStatus.Success)
-                return "https://lim-sc01/owa";
-        }
-        catch { }
-
-        try
-        {
-            Ping ping = new Ping();
-
-            PingReply reply = ping.Send("mail.supervisorlinea2.com", 1000);
-
-            if (reply.Status == IPStatus.Success)
-                return "https://mail.supervisorlinea2.com/owa";
-        }
-        catch { }
-
-        return null;
-    }
-
-    static void MostrarErrorOutlook()
-    {
-        MessageBox.Show(
-            "No se pudo conectar al servidor de correo.\n\nVerifique su conexión a la red o VPN.",
-            "Outlook",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Error
-        );
     }
 }
